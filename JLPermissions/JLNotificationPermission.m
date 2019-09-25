@@ -182,25 +182,17 @@
 #pragma mark - Helpers
 
 - (NSString *)parseDeviceID:(NSData *)deviceToken {
-  NSString *token = [deviceToken description];
-  return [[self regex] stringByReplacingMatchesInString:token
-                                                options:0
-                                                  range:NSMakeRange(0, [token length])
-                                           withTemplate:@""];
-}
-
-- (NSRegularExpression *)regex {
-  NSError *error;
-  NSRegularExpression *exp =
-      [NSRegularExpression regularExpressionWithPattern:@"[<> ]"
-                                                options:NSRegularExpressionCaseInsensitive
-                                                  error:&error];
-
-  if (!exp) {
-    NSLog(@"Failed to instantiate the regex parser due to %@", error);
+  NSUInteger dataLength = deviceToken.length;
+  if (dataLength == 0) {
+    return nil;
   }
-
-  return exp;
+  
+  const unsigned char *dataBuffer = (const unsigned char *)deviceToken.bytes;
+  NSMutableString *hexString  = [NSMutableString stringWithCapacity:(dataLength * 2)];
+  for (int i = 0; i < dataLength; ++i) {
+    [hexString appendFormat:@"%02x", dataBuffer[i]];
+  }
+  return [hexString copy];
 }
 
 @end
